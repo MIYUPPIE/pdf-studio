@@ -4,7 +4,7 @@ MUPDF := $(ROOT)/third_party/mupdf
 EMSDK ?= $(HOME)/emsdk
 MUPDF_FLAGS := brotli=no mujs=no extract=no
 
-.PHONY: all deps mupdf mupdf-native mupdf-wasm native wasm test test-asan test-wasm e2e eval serve hooks clean
+.PHONY: site all deps mupdf mupdf-native mupdf-wasm native wasm test test-asan test-wasm e2e eval serve hooks clean
 
 all: wasm test
 
@@ -48,6 +48,18 @@ eval: native
 	services/engine/evals/fetch_corpus.sh
 	cd services/engine && python3 evals/run_eval.py --cli build/native/pdfedit-cli
 
+# Deployable static site: only runtime files (no tests, no node_modules, no mock-only assets).
+SITE := build/site
+site: wasm
+	rm -rf $(SITE) && mkdir -p $(SITE)
+	cp -r services/web/index.html services/web/css services/web/js services/web/engine $(SITE)/
+	cp LICENSE $(SITE)/LICENSE.txt
+	touch $(SITE)/.nojekyll
+	@du -sh $(SITE)
+
+serve-site: site
+	cd $(SITE) && python3 -m http.server 8766
+
 serve:
 	cd services/web && python3 -m http.server 8765
 
@@ -56,3 +68,4 @@ hooks:
 
 clean:
 	$(MAKE) -C services/engine clean
+	rm -rf build

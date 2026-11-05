@@ -63,7 +63,11 @@ font instead). Corpus: `services/engine/evals/fetch_corpus.sh`.
 
 ## Deploying
 
-`make wasm`, then serve `services/web/` from any static host (Netlify, Cloudflare Pages, S3,
+Live site: https://miyuppie.github.io/pdf-studio/ . Every push to `main` runs
+`.github/workflows/deploy.yml`, which builds MuPDF and the engine, runs the gate tests and the
+wasm smoke test, and publishes `build/site` to GitHub Pages.
+
+To host elsewhere, run `make site` and upload `build/site/` to any static host (Netlify, Cloudflare Pages, S3,
 nginx). Requirements:
 
 * `.wasm` served as `application/wasm`; enable gzip or brotli (the 7.5 MB wasm compresses to 3.2 MB).

@@ -1,0 +1,60 @@
+# Build the C++ engine to WebAssembly, run the gate tests, deploy the site to GitHub Pages.
+name: Build and deploy
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+
+      # MuPDF source + native/wasm builds and Emscripten are large and slow to build: cache them.
+      - name: Cache third-party builds
+        uses: actions/cache@v4
+        with:
+          path: |
+            third_party
+            ~/emsdk
+          key: deps-${{ runner.os }}-${{ hashFiles('scripts/fetch_deps.sh', 'patches/**', 'Makefile') }}
+
+      - name: Fetch pinned dependencies (MuPDF 1.28.6 + patches, Emscripten 6.0.13)
+        run: scripts/fetch_deps.sh
+
+      - name: Build MuPDF (native for tests, wasm for the site)
+        run: make mupdf
+
+      - name: Gate tests
+        run: make test
+
+      - name: Build site
+        run: make site
+
+      - name: Smoke-test the wasm engine
+        run: node --test services/engine/tests/wasm_smoke.mjs
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: build/site
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-24.04
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
