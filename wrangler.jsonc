@@ -1,0 +1,10 @@
+// Cloudflare Workers static-assets deploy of the built site (`make site` first).
+// Deploy: make deploy-cloudflare
+{
+  "name": "pdf-studio",
+  "compatibility_date": "2026-10-01",
+  "assets": {
+    "directory": "./build/site",
+    "not_found_handling": "single-page-application"
+  }
+}

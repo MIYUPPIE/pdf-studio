@@ -4,7 +4,7 @@ MUPDF := $(ROOT)/third_party/mupdf
 EMSDK ?= $(HOME)/emsdk
 MUPDF_FLAGS := brotli=no mujs=no extract=no
 
-.PHONY: site all deps mupdf mupdf-native mupdf-wasm native wasm test test-asan test-wasm e2e eval serve hooks clean
+.PHONY: deploy-cloudflare site all deps mupdf mupdf-native mupdf-wasm native wasm test test-asan test-wasm e2e eval serve hooks clean
 
 all: wasm test
 
@@ -56,6 +56,9 @@ site: wasm
 	cp LICENSE $(SITE)/LICENSE.txt
 	touch $(SITE)/.nojekyll
 	@du -sh $(SITE)
+
+deploy-cloudflare: site
+	npx --yes wrangler@4 deploy
 
 serve-site: site
 	cd $(SITE) && python3 -m http.server 8766

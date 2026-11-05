@@ -63,7 +63,10 @@ font instead). Corpus: `services/engine/evals/fetch_corpus.sh`.
 
 ## Deploying
 
-Live site: https://miyuppie.github.io/pdf-studio/ . Every push to `main` runs
+Live site: https://pdf-studio.yemokanlawon.workers.dev (Cloudflare Workers static assets,
+deployed with `make deploy-cloudflare`, config in `wrangler.jsonc`).
+
+GitHub Pages mirror: https://miyuppie.github.io/pdf-studio/ . Every push to `main` runs
 `.github/workflows/deploy.yml`, which builds MuPDF and the engine, runs the gate tests and the
 wasm smoke test, and publishes `build/site` to GitHub Pages.
 
