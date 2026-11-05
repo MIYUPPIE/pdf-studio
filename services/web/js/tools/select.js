@@ -4,6 +4,9 @@ import { placeEl } from '../viewer.js';
 import { moveRect, resizeRect, annotGeometryUpdate, hexToRgb, rgbToHex } from '../geometry.js';
 import { hitTest, openTextEditor, FREE_FONTS, freeTextRect } from './common.js';
 import { promptDialog } from '../dialogs.js';
+import { icon } from '../icons.js';
+
+const EDITABLE = new Set(['FreeText', 'Text']);
 
 const HANDLES = ['nw', 'n', 'ne', 'e', 'se', 's', 'sw', 'w'];
 const POINT_TYPES = new Set(['Ink', 'Line', 'PolyLine', 'Polygon', 'Highlight', 'Underline', 'StrikeOut', 'Squiggly']);
@@ -57,13 +60,53 @@ export class Selection {
       hd.dataset.h = h;
       box.appendChild(hd);
     }
-    box.addEventListener('pointerdown', (e) => this.startDrag(e, v, a, box));
+    box.addEventListener('pointerdown', (e) => this.startDrag(e, v, a, box, true));
     box.addEventListener('dblclick', (e) => { e.stopPropagation(); this.editContents(v, a); });
+    box.appendChild(this.actionBar(v, a));
     v.selLayer.appendChild(box);
     this.box = box;
   }
 
-  startDrag(e, v, a, box) {
+  /** Floating actions on the selected object (discoverable on touch and mouse alike). */
+  actionBar(v, a) {
+    const bar = document.createElement('div');
+    bar.className = 'sel-actions';
+    bar.setAttribute('role', 'toolbar');
+    bar.setAttribute('aria-label', 'Selected object');
+    if (a.rect[1] * state.scale < 52) bar.classList.add('below');
+    const btn = (act, ic, label, extra = '') =>
+      `<button type="button" data-act="${act}" class="${extra}" aria-label="${label}" data-tip="${label}">${icon(ic)}<span>${label}</span></button>`;
+    bar.innerHTML = [
+      EDITABLE.has(a.type) ? btn('edit', 'edittext', a.type === 'Text' ? 'Edit note' : 'Edit text') : '',
+      btn('style', 'sliders', 'Style'),
+      a.type !== 'Stamp' ? btn('duplicate', 'copy', 'Duplicate') : '',
+      btn('delete', 'trash', 'Delete', 'danger'),
+    ].join('');
+    bar.addEventListener('pointerdown', (e) => e.stopPropagation());
+    bar.addEventListener('dblclick', (e) => e.stopPropagation());
+    bar.addEventListener('click', (e) => {
+      const act = e.target.closest('[data-act]')?.dataset.act;
+      if (act === 'edit') this.editContents(v, a);
+      else if (act === 'style') this.app.layout.set('props', 'open');
+      else if (act === 'duplicate') this.duplicate(v, a);
+      else if (act === 'delete') this.remove();
+    });
+    return bar;
+  }
+
+  async duplicate(v, a) {
+    const off = 14;
+    const spec = { page: v.index, type: a.type };
+    for (const k of ['color', 'fill', 'opacity', 'borderWidth', 'contents', 'font', 'fontSize', 'align', 'lineEnding']) if (a[k] !== undefined && a[k] !== null) spec[k] = a[k];
+    const r = a.rect;
+    const moved = [r[0] + off, r[1] + off, r[2] + off, r[3] + off];
+    Object.assign(spec, annotGeometryUpdate(a, moved));
+    spec.rect = moved;
+    const res = await this.app.mutate('addAnnotation', spec, null, { page: v.index });
+    if (res?.id) await this.select(v.index, res.id);
+  }
+
+  startDrag(e, v, a, box, wasSelected = false) {
     if (e.button !== 0) return;
     e.stopPropagation();
     e.preventDefault();
@@ -86,10 +129,12 @@ export class Selection {
       }
       placeEl(box, rect);
     };
-    const onUp = async () => {
+    const onUp = async (ev) => {
       box.removeEventListener('pointermove', onMove);
       box.removeEventListener('pointerup', onUp);
       box.removeEventListener('pointercancel', onUp);
+      // A plain tap on text that was already selected edits it (touch has no double-click).
+      if (!moved && wasSelected && !handle && ev?.type === 'pointerup' && a.type === 'FreeText') { this.editContents(v, a); return; }
       if (!moved) return;
       await this.updateGeometry(v.index, a, rect);
     };
@@ -157,7 +202,7 @@ export class SelectTool {
       await this.app.selection.select(v.index, hit.id);
       // allow immediate drag-after-select
       const box = this.app.selection.box;
-      if (box && e.buttons === 1) this.app.selection.startDrag(e, v, this.app.selection.annot, box);
+      if (box && e.buttons === 1) this.app.selection.startDrag(e, v, this.app.selection.annot, box, false);
     } else {
       this.app.selection.deselect();
     }

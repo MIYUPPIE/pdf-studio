@@ -132,3 +132,29 @@ test('page operations with the real engine: rotate, delete, undo', async ({ page
   await expect.poll(async () => (await info(page)).pageCount).toBe(2);
   await expect(page.locator('.thumb')).toHaveCount(2);
 });
+
+test('created text and shapes stay editable (regression: could not modify after creating)', async ({ page }) => {
+  await openReal(page);
+  const list = async () => (await engine(page, 'listAnnotations', { page: 0 })).annots;
+  await tool(page, 'text');
+  await clickAt(page, 0, 300, 300);
+  await page.locator('.text-editor').fill('Typed once');
+  await page.locator('.text-editor').press('Enter');
+  await until(async () => (await list()).some((a) => a.contents === 'Typed once'));
+  // Selected immediately; one more click edits the same box.
+  await expect(page.locator('.sel-box')).toBeVisible();
+  const a = (await list()).find((x) => x.type === 'FreeText');
+  await clickAt(page, 0, a.rect[0] + 4, a.rect[1] + 4);
+  await page.locator('.text-editor').fill('Typed twice');
+  await page.locator('.text-editor').press('Enter');
+  await until(async () => (await list()).some((x) => x.contents === 'Typed twice'));
+  expect((await list()).filter((x) => x.type === 'FreeText').length).toBe(1);
+  // A shape: drawn, selected, then moved by dragging with a shape tool still active.
+  await tool(page, 'rect');
+  await drag(page, 0, [100, 450], [200, 520]);
+  await until(async () => (await list()).some((x) => x.type === 'Square'));
+  await tool(page, 'rect');
+  await drag(page, 0, [150, 485], [230, 545]);
+  await until(async () => (await list()).find((x) => x.type === 'Square').rect[0] > 160);
+  expect((await list()).filter((x) => x.type === 'Square').length).toBe(1);
+});

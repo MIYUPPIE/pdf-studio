@@ -213,6 +213,9 @@ export class Viewer {
       v.placeholder.hidden = true;
       v.el.dataset.rendered = '1';
       emit('page-rendered', v.index);
+      // Keep the annotation list warm so tools can hit-test existing objects
+      // synchronously (pressing on an object selects it instead of creating).
+      if (!v.annots) this.app.getAnnots(v.index).catch(() => {});
     } catch (e) {
       v.dirty = true;
       v.placeholder.textContent = 'Failed to render page';

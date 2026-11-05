@@ -10,36 +10,98 @@
 </head>
 <body>
   <header class="topbar">
-    <div class="brand"><span class="logo" aria-hidden="true"></span><span>PDF Studio</span></div>
-    <div class="menu-wrap">
-      <button class="btn ghost" id="docMenuBtn" data-icon="menu" aria-haspopup="menu" aria-expanded="false" disabled><span>Document</span></button>
+    <button class="btn icon-btn doc-only" id="sidebarToggle" data-icon="sidebar" aria-label="Show or hide pages" aria-controls="sidebar" aria-expanded="true" data-tip="Pages"></button>
+    <a class="brand" href="./" aria-label="PDF Studio home"><span class="logo" aria-hidden="true"></span><span class="brand-name">PDF Studio</span></a>
+    <div class="menu-wrap doc-only">
+      <button class="btn ghost" id="docMenuBtn" data-icon="menu" aria-haspopup="menu" aria-expanded="false" aria-label="Document menu" disabled><span class="label">Document</span></button>
       <div class="menu" id="docMenu" role="menu" hidden>
+        <div class="menu-section">File</div>
         <button role="menuitem" data-action="open" data-icon="upload"><span>Open file…</span><kbd>Ctrl O</kbd></button>
         <button role="menuitem" data-action="newBlank" data-icon="plus"><span>New blank PDF…</span></button>
-        <button role="menuitem" data-action="convert" data-icon="merge"><span>Convert files to PDF…</span></button>
+        <button role="menuitem" data-action="convert" data-icon="file"><span>Convert files to PDF…</span></button>
+        <button role="menuitem" data-action="download" data-icon="download"><span>Download…</span><kbd>Ctrl S</kbd></button>
+        <hr>
+        <div class="menu-section">Pages</div>
         <button role="menuitem" data-action="merge" data-icon="merge"><span>Merge files…</span></button>
         <button role="menuitem" data-action="insertBlank" data-icon="plus"><span>Insert blank page</span></button>
         <button role="menuitem" data-action="extract" data-icon="extract"><span>Extract / split pages…</span></button>
         <button role="menuitem" data-action="exportImage" data-icon="photo"><span>Export page as image…</span></button>
         <hr>
+        <div class="menu-section">Document</div>
         <button role="menuitem" data-action="compress" data-icon="compress"><span>Compress…</span></button>
         <button role="menuitem" data-action="protect" data-icon="lock"><span>Protect with password…</span></button>
         <button role="menuitem" data-action="decrypt" data-icon="unlock"><span>Remove password</span></button>
         <button role="menuitem" data-action="metadata" data-icon="info"><span>Properties…</span></button>
         <button role="menuitem" data-action="addFont" data-icon="text"><span>Add custom font…</span></button>
+        <button role="menuitem" data-action="theme" data-icon="sun"><span>Switch theme</span></button>
         <hr>
-        <button role="menuitem" data-action="download" data-icon="download"><span>Download…</span><kbd>Ctrl S</kbd></button>
         <button role="menuitem" data-action="close" data-icon="close"><span>Close document</span></button>
       </div>
     </div>
-    <div class="filename" id="fileName" title=""></div>
+    <div class="filename doc-only" id="fileName" title=""></div>
     <div class="spacer"></div>
-    <div class="group" role="group" aria-label="History">
-      <button class="btn icon-btn" id="undoBtn" data-icon="undo" aria-label="Undo" title="Undo (Ctrl+Z)" disabled></button>
-      <button class="btn icon-btn" id="redoBtn" data-icon="redo" aria-label="Redo" title="Redo (Ctrl+Shift+Z)" disabled></button>
+    <div class="group doc-only" role="group" aria-label="History">
+      <button class="btn icon-btn" id="undoBtn" data-icon="undo" aria-label="Undo" data-tip="Undo  Ctrl+Z" disabled></button>
+      <button class="btn icon-btn" id="redoBtn" data-icon="redo" aria-label="Redo" data-tip="Redo  Ctrl+Shift+Z" disabled></button>
     </div>
-    <div class="group zoom" role="group" aria-label="Zoom">
-      <button class="btn icon-btn" id="zoomOutBtn" data-icon="zoomout" aria-label="Zoom out" title="Zoom out (Ctrl -)" disabled></button>
+    <button class="btn icon-btn doc-only" id="searchBtn" data-icon="search" aria-label="Search" data-tip="Find  Ctrl+F" disabled></button>
+    <button class="btn icon-btn doc-only" id="propsToggle" data-icon="sliders" aria-label="Show or hide properties" aria-controls="props" aria-expanded="true" data-tip="Properties"></button>
+    <button class="btn icon-btn" id="themeBtn" data-icon="monitor" aria-label="Theme: automatic" data-tip="Theme"></button>
+    <button class="btn primary doc-only" id="downloadBtn" data-icon="download" aria-label="Download" disabled><span class="label">Download</span></button>
+  </header>
+
+  <nav class="toolbar" id="toolbar" role="toolbar" aria-label="Editing tools">
+    <div class="tgroup" role="group" aria-label="Select and edit">
+      <button class="tool" data-tool="select" data-icon="select" aria-label="Select and move" data-tip="Select  V" aria-pressed="true"></button>
+      <button class="tool" data-tool="edittext" data-icon="edittext" aria-label="Edit existing text" data-tip="Edit text  E"></button>
+    </div>
+    <div class="tgroup" role="group" aria-label="Insert">
+      <button class="tool" data-tool="text" data-icon="text" aria-label="Add text" data-tip="Add text  T"></button>
+      <button class="tool" data-tool="image" data-icon="image" aria-label="Add image" data-tip="Image  I"></button>
+      <button class="tool" data-tool="draw" data-icon="draw" aria-label="Freehand draw" data-tip="Draw  D"></button>
+      <button class="tool" data-tool="rect" data-icon="rect" aria-label="Rectangle" data-tip="Rectangle  R"></button>
+      <button class="tool" data-tool="ellipse" data-icon="ellipse" aria-label="Ellipse" data-tip="Ellipse  O"></button>
+      <button class="tool" data-tool="line" data-icon="line" aria-label="Line" data-tip="Line  L"></button>
+      <button class="tool" data-tool="arrow" data-icon="arrow" aria-label="Arrow" data-tip="Arrow  A"></button>
+    </div>
+    <div class="tgroup" role="group" aria-label="Annotate">
+      <button class="tool" data-tool="highlight" data-icon="highlight" aria-label="Highlight text" data-tip="Highlight  H"></button>
+      <button class="tool" data-tool="underline" data-icon="underline" aria-label="Underline text" data-tip="Underline  U"></button>
+      <button class="tool" data-tool="strike" data-icon="strike" aria-label="Strike out text" data-tip="Strikeout  K"></button>
+      <button class="tool" data-tool="note" data-icon="note" aria-label="Sticky note" data-tip="Note  N"></button>
+    </div>
+    <div class="tgroup" role="group" aria-label="Sign, forms and redaction">
+      <button class="tool" data-tool="signature" data-icon="signature" aria-label="Signature" data-tip="Sign  S"></button>
+      <button class="tool" data-tool="form" data-icon="form" aria-label="Form fields" data-tip="Form fields  F"></button>
+      <button class="tool danger" data-tool="redact" data-icon="redact" aria-label="Redact" data-tip="Redact  X"></button>
+    </div>
+  </nav>
+
+  <main class="workspace" id="workspace" hidden>
+    <aside class="sidebar panel" id="sidebar" aria-label="Pages">
+      <div class="sidebar-head">
+        <span>Pages <span class="count" id="sideCount"></span></span>
+        <div class="sidebar-actions">
+          <button class="btn icon-btn sm" id="thumbRotateL" data-icon="rotateleft" aria-label="Rotate selected pages left" data-tip="Rotate left"></button>
+          <button class="btn icon-btn sm" id="thumbRotateR" data-icon="rotate" aria-label="Rotate selected pages right" data-tip="Rotate right"></button>
+          <button class="btn icon-btn sm" id="thumbExtract" data-icon="extract" aria-label="Extract selected pages" data-tip="Extract"></button>
+          <button class="btn icon-btn sm" id="thumbDelete" data-icon="trash" aria-label="Delete selected pages" data-tip="Delete"></button>
+        </div>
+      </div>
+      <ol class="thumbs" id="thumbs"></ol>
+    </aside>
+    <section class="viewer" id="viewer" tabindex="0" aria-label="Document pages">
+      <div class="pages" id="pages"></div>
+    </section>
+    <div class="viewbar" role="group" aria-label="Page and zoom">
+      <button class="btn icon-btn sm" id="prevPageBtn" data-icon="chevleft" aria-label="Previous page" data-tip="Previous page"></button>
+      <span class="pagenav">
+        <input id="pageInput" type="number" min="1" value="1" aria-label="Current page" inputmode="numeric" disabled>
+        <span class="of">of <span id="pageCount">0</span></span>
+      </span>
+      <button class="btn icon-btn sm" id="nextPageBtn" data-icon="chevright" aria-label="Next page" data-tip="Next page"></button>
+      <span class="vsep" aria-hidden="true"></span>
+      <button class="btn icon-btn sm" id="zoomOutBtn" data-icon="zoomout" aria-label="Zoom out" data-tip="Zoom out  Ctrl −" disabled></button>
       <select id="zoomSelect" aria-label="Zoom level" disabled>
         <option value="width">Fit width</option>
         <option value="page">Fit page</option>
@@ -48,72 +110,46 @@
         <option value="3">300%</option><option value="4">400%</option>
         <option value="custom" hidden>100%</option>
       </select>
-      <button class="btn icon-btn" id="zoomInBtn" data-icon="zoomin" aria-label="Zoom in" title="Zoom in (Ctrl +)" disabled></button>
+      <button class="btn icon-btn sm" id="zoomInBtn" data-icon="zoomin" aria-label="Zoom in" data-tip="Zoom in  Ctrl +" disabled></button>
     </div>
-    <div class="group pagenav" role="group" aria-label="Page navigation">
-      <input id="pageInput" type="number" min="1" value="1" aria-label="Current page" disabled>
-      <span>/ <span id="pageCount">0</span></span>
-    </div>
-    <button class="btn icon-btn" id="searchBtn" data-icon="search" aria-label="Search" title="Search (Ctrl+F)" disabled></button>
-    <button class="btn primary" id="downloadBtn" data-icon="download" disabled><span>Download</span></button>
-  </header>
-
-  <nav class="toolbar" id="toolbar" role="toolbar" aria-label="Editing tools">
-    <button class="tool" data-tool="select" data-icon="select" aria-label="Select and move" title="Select / move (V)" aria-pressed="true"></button>
-    <button class="tool" data-tool="edittext" data-icon="edittext" aria-label="Edit existing text" title="Edit text (E)"></button>
-    <span class="sep"></span>
-    <button class="tool" data-tool="text" data-icon="text" aria-label="Add text" title="Add text (T)"></button>
-    <button class="tool" data-tool="image" data-icon="image" aria-label="Add image" title="Add image (I)"></button>
-    <button class="tool" data-tool="draw" data-icon="draw" aria-label="Freehand draw" title="Draw (D)"></button>
-    <button class="tool" data-tool="rect" data-icon="rect" aria-label="Rectangle" title="Rectangle (R)"></button>
-    <button class="tool" data-tool="ellipse" data-icon="ellipse" aria-label="Ellipse" title="Ellipse (O)"></button>
-    <button class="tool" data-tool="line" data-icon="line" aria-label="Line" title="Line (L)"></button>
-    <button class="tool" data-tool="arrow" data-icon="arrow" aria-label="Arrow" title="Arrow (A)"></button>
-    <span class="sep"></span>
-    <button class="tool" data-tool="highlight" data-icon="highlight" aria-label="Highlight text" title="Highlight (H)"></button>
-    <button class="tool" data-tool="underline" data-icon="underline" aria-label="Underline text" title="Underline (U)"></button>
-    <button class="tool" data-tool="strike" data-icon="strike" aria-label="Strike out text" title="Strikeout (K)"></button>
-    <button class="tool" data-tool="note" data-icon="note" aria-label="Sticky note" title="Note (N)"></button>
-    <span class="sep"></span>
-    <button class="tool" data-tool="signature" data-icon="signature" aria-label="Signature" title="Sign (S)"></button>
-    <button class="tool" data-tool="form" data-icon="form" aria-label="Form fields" title="Form fields (F)"></button>
-    <button class="tool danger" data-tool="redact" data-icon="redact" aria-label="Redact" title="Redact (X)"></button>
-  </nav>
-
-  <main class="workspace" id="workspace" hidden>
-    <aside class="sidebar" id="sidebar" aria-label="Pages">
-      <div class="sidebar-head">
-        <span>Pages</span>
-        <div class="sidebar-actions">
-          <button class="btn icon-btn sm" id="thumbRotateL" data-icon="rotateleft" aria-label="Rotate selected pages left" title="Rotate left"></button>
-          <button class="btn icon-btn sm" id="thumbRotateR" data-icon="rotate" aria-label="Rotate selected pages right" title="Rotate right"></button>
-          <button class="btn icon-btn sm" id="thumbExtract" data-icon="extract" aria-label="Extract selected pages" title="Extract"></button>
-          <button class="btn icon-btn sm" id="thumbDelete" data-icon="trash" aria-label="Delete selected pages" title="Delete"></button>
-        </div>
-      </div>
-      <ol class="thumbs" id="thumbs"></ol>
-    </aside>
-    <section class="viewer" id="viewer" tabindex="0" aria-label="Document pages">
-      <div class="pages" id="pages"></div>
-    </section>
-    <aside class="props" id="props" aria-label="Properties"></aside>
+    <aside class="props panel" id="props" aria-label="Properties"></aside>
+    <div class="scrim" id="scrim" hidden></div>
   </main>
 
   <section class="landing" id="landing">
-    <div class="drop" id="dropZone" tabindex="0" role="button" aria-label="Open a PDF file">
-      <div class="drop-icon" data-icon="upload"></div>
-      <h1>Edit any PDF</h1>
-      <p>Drop a file here or <span class="link">choose a file</span></p>
-      <p class="muted small">PDF, Word, Excel, PowerPoint, images, HTML, Markdown, text, EPUB, XPS and more. Your file is processed on this device and is never uploaded.</p>
+    <div class="hero">
+      <div class="hero-copy">
+        <span class="eyebrow"><span data-icon="lock"></span>Private by design. Nothing is uploaded.</span>
+        <h1>Edit any PDF, right in your browser.</h1>
+        <p class="lede">Change existing text, sign, fill forms, redact, merge and convert documents. Everything runs on your device, so your files never leave it.</p>
+        <div class="cta">
+          <button class="btn primary lg" id="openBtn" data-icon="upload"><span>Open a file</span></button>
+          <button class="btn lg" id="newBlankBtn" data-icon="plus"><span>Blank PDF</span></button>
+          <button class="btn lg" id="convertBtn" data-icon="file"><span>Convert files to PDF</span></button>
+        </div>
+      </div>
+      <div class="drop" id="dropZone" tabindex="0" role="button" aria-label="Open a file: drop it here or press Enter to choose">
+        <div class="drop-art" aria-hidden="true">
+          <span class="sheet s1"></span><span class="sheet s2"></span><span class="sheet s3"><span data-icon="upload"></span></span>
+        </div>
+        <p class="drop-title">Drop files here</p>
+        <p class="drop-sub">or <span class="link">browse your device</span></p>
+        <p class="formats">PDF · Word · Excel · PowerPoint · Images · HTML · Markdown · Text · EPUB · XPS</p>
+      </div>
     </div>
-    <div class="create-row" aria-label="Create a PDF">
-      <button class="btn" id="newBlankBtn" data-icon="plus"><span>Blank PDF</span></button>
-      <button class="btn" id="convertBtn" data-icon="merge"><span>Convert files to PDF</span></button>
-    </div>
-    <ul class="features">
-      <li>Edit existing text</li><li>Add text, images, shapes</li><li>Sign &amp; fill forms</li>
-      <li>Merge, split, reorder</li><li>Redact permanently</li><li>Compress &amp; protect</li>
+    <ul class="features" aria-label="Features">
+      <li><span class="fi" data-icon="edittext"></span><strong>Edit existing text</strong><span>Retype any line. Original fonts and layout are kept.</span></li>
+      <li><span class="fi" data-icon="signature"></span><strong>Sign &amp; fill forms</strong><span>Draw, type or upload a signature. Fill and create fields.</span></li>
+      <li><span class="fi" data-icon="highlight"></span><strong>Annotate</strong><span>Text, images, shapes, highlights and notes.</span></li>
+      <li><span class="fi" data-icon="merge"></span><strong>Organize pages</strong><span>Merge, split, reorder, rotate and insert pages.</span></li>
+      <li><span class="fi" data-icon="redact"></span><strong>Redact for real</strong><span>Removes the content underneath, not just a black box.</span></li>
+      <li><span class="fi" data-icon="lock"></span><strong>Compress &amp; protect</strong><span>Shrink files and add AES-256 password protection.</span></li>
     </ul>
+    <footer class="landing-foot">
+      <span>Open source under AGPL-3.0</span>
+      <a href="https://github.com/MIYUPPIE/pdf-studio" target="_blank" rel="noopener">Source code</a>
+      <span>Powered by MuPDF, compiled to WebAssembly</span>
+    </footer>
   </section>
 
   <div class="searchbar" id="searchBar" hidden role="search">

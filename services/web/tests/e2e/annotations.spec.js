@@ -100,6 +100,7 @@ test('drawn signature placed as Ink', async ({ page }) => {
   await page.mouse.move(b.x + 220, b.y + 90, { steps: 6 });
   await page.mouse.up();
   await page.locator('#modal [data-ok]').click();
+  await expect(page.locator('#modal')).not.toBeVisible();  // typed signatures render asynchronously
   await clickAt(page, 0, 300, 500);
   await until(async () => (await types(page)).includes('Ink'));
   const ink = (await annots(page)).find((a) => a.type === 'Ink');
@@ -112,6 +113,7 @@ test('typed signature placed as image Stamp', async ({ page }) => {
   await page.locator('#modal [data-tab="type"]').click();
   await page.locator('#modal input[name=typed]').fill('Olayemi Test');
   await page.locator('#modal [data-ok]').click();
+  await expect(page.locator('#modal')).not.toBeVisible();  // typed signatures render asynchronously
   await clickAt(page, 0, 300, 500);
   await until(async () => (await types(page)).includes('Stamp'));
 });

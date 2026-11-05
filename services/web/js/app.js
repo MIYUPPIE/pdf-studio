@@ -13,6 +13,7 @@ import { closeTextEditor, isEditingText } from './tools/common.js';
 import { toast, busy, modal, confirmDialog, readFile, escapeHtml } from './dialogs.js';
 import { hydrateIcons } from './icons.js';
 import { fitScale, nextZoom, clampZoom } from './geometry.js';
+import { Layout } from './layout.js';
 
 const $ = (id) => document.getElementById(id);
 const STRUCTURAL = new Set(['rotatePages', 'deletePages', 'reorderPages', 'insertBlankPage', 'insertDocument', 'undo', 'redo']);
@@ -50,6 +51,7 @@ class App {
     this.search = new Search(this);
     this.docops = new DocOps(this);
     document.body.classList.add('no-doc');
+    this.layout = new Layout(this);
     this.wire();
     this.loadFormats();
     on('current-page', (i) => { $('pageInput').value = i + 1; });
@@ -97,6 +99,12 @@ class App {
       this.thumbs.invalidate(page);
     }
     await this.refreshInfo();
+    // Objects made with one-shot creation tools are immediately selected (and
+    // the Select tool activated) so they can be moved, restyled or edited.
+    if (method === 'addAnnotation' && result?.id && page !== undefined && this.tools.selectsAfterCreate(state.tool)) {
+      this.tools.set('select');
+      await this.selection.select(page, result.id);
+    }
     return result;
   }
 
@@ -227,7 +235,8 @@ class App {
     document.body.classList.remove('no-doc');
     $('landing').hidden = true;
     $('workspace').hidden = false;
-    for (const id of ['docMenuBtn', 'zoomInBtn', 'zoomOutBtn', 'zoomSelect', 'pageInput', 'searchBtn', 'downloadBtn']) $(id).disabled = false;
+    for (const id of ['docMenuBtn', 'zoomInBtn', 'zoomOutBtn', 'zoomSelect', 'pageInput', 'searchBtn', 'downloadBtn', 'prevPageBtn', 'nextPageBtn']) $(id).disabled = false;
+    this.layout.applyDefaults();
     document.title = `${state.fileName} · PDF Studio`;
     this.applyDocInfo(info, true);
     state.fitMode = 'width';
@@ -331,7 +340,7 @@ class App {
     $('workspace').hidden = true;
     $('fileName').textContent = '';
     document.title = 'PDF Studio';
-    for (const id of ['docMenuBtn', 'zoomInBtn', 'zoomOutBtn', 'zoomSelect', 'pageInput', 'searchBtn', 'downloadBtn', 'undoBtn', 'redoBtn']) $(id).disabled = true;
+    for (const id of ['docMenuBtn', 'zoomInBtn', 'zoomOutBtn', 'zoomSelect', 'pageInput', 'searchBtn', 'downloadBtn', 'undoBtn', 'redoBtn', 'prevPageBtn', 'nextPageBtn']) $(id).disabled = true;
   }
 
   setDirty(d) {
@@ -496,6 +505,7 @@ class App {
       switch (action) {
         case 'open': $('fileInput').click(); break;
         case 'newBlank': await this.newBlank(); break;
+        case 'theme': this.layout.cycleTheme(); break;
         case 'convert': await this.convertFiles(); break;
         case 'merge': await this.docops.merge(); break;
         case 'insertBlank': await this.insertBlank(state.currentPage + 1); break;

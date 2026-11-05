@@ -17,6 +17,7 @@ js/engine-client.js     EngineClient: promise RPC over the worker
 js/worker.js            Web Worker: loads ../engine/pdfengine.js (or mock), Map<docId, Module.Document>
 js/mock-engine.js       in-browser fake engine with the same surface (used with ?mock=1)
 js/state.js             shared UI state, tool defaults, tiny event bus
+js/layout.js            responsive layout: panel state (body[data-side|data-props]), drawers/sheets, theme, page stepping, pinch zoom
 js/geometry.js          pure geometry (rects, quads, selection, zoom, reorder, page ranges); unit tested
 js/viewer.js            continuous scroll viewer, lazy HiDPI rendering, per-page overlay layers, form-field inputs
 js/thumbnails.js        sidebar thumbnails, multi-select, drag-to-reorder, context menu
@@ -29,6 +30,24 @@ js/tools/*.js           one module per tool family (select, edittext, create, ma
 tests/unit/             node --test (pure logic)
 tests/e2e/              Playwright against the mock engine
 ```
+
+### Responsive layout
+
+| Width | Pages | Properties | Tools |
+|---|---|---|---|
+| ≥ 1200px | column, collapsible | column, collapsible | top bar |
+| 768–1199px | column, collapsible | slide-in drawer | top bar |
+| < 768px | slide-in drawer | bottom sheet | bottom dock (scrolls) |
+
+Page/zoom controls float over the document at every size. On touch, one finger scrolls in
+Select / Edit-text modes; drawing tools capture the finger; two fingers pinch-zoom.
+
+### Working with objects you created
+
+One-shot tools (text, shapes, note, image, signature) switch to Select with the new object
+selected. Pressing an existing object with a creation tool selects it (drag moves it); with the
+Text or Edit-text tool, pressing added text edits it. Tapping a selected text box edits it (touch
+has no double-click). The selected object shows an action bar: Edit, Style, Duplicate, Delete.
 
 ### Engine call model
 
