@@ -1,0 +1,13 @@
+third_party/
+build/
+services/engine/build/
+services/web/engine/
+services/web/node_modules/
+services/web/test-results/
+services/web/playwright-report/
+services/engine/evals/corpus/
+services/engine/evals/out/
+*.o
+*.a
+.env
+.DS_Store

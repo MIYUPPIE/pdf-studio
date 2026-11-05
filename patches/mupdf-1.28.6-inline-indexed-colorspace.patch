@@ -1,0 +1,36 @@
+--- a/source/pdf/pdf-op-buffer.c
++++ b/source/pdf/pdf-op-buffer.c
+@@ -858,8 +858,32 @@
+ 			fz_write_string(ctx, out, "/CS/RGB");
+ 		else if (cs == fz_device_cmyk(ctx))
+ 			fz_write_string(ctx, out, "/CS/CMYK");
+-		else if (cs)
++		else if (cs && colorspace && colorspace[0])
+ 			fz_write_printf(ctx, out, "/CS%n", colorspace);
++		else if (cs && fz_colorspace_is_indexed(ctx, cs) && (
++			fz_colorspace_is_gray(ctx, fz_base_colorspace(ctx, cs)) ||
++			fz_colorspace_is_rgb(ctx, fz_base_colorspace(ctx, cs)) ||
++			fz_colorspace_is_cmyk(ctx, fz_base_colorspace(ctx, cs))))
++		{
++			/* pdfedit patch: an unnamed inline Indexed colorspace (e.g.
++			 * "BI /CS [/I /RGB 3 <...>]") used to be written as an empty
++			 * name ("/CS/"), producing a corrupt content stream. Write the
++			 * colorspace array inline instead. */
++			fz_colorspace *base = fz_base_colorspace(ctx, cs);
++			const char *bn = fz_colorspace_is_gray(ctx, base) ? "G" : fz_colorspace_is_rgb(ctx, base) ? "RGB" : "CMYK";
++			int high = cs->u.indexed.high;
++			size_t k, nlookup = (size_t)fz_colorspace_n(ctx, base) * (high + 1);
++			fz_write_printf(ctx, out, "/CS[/I/%s %d<", bn, high);
++			for (k = 0; k < nlookup; ++k)
++			{
++				int c = cs->u.indexed.lookup[k];
++				fz_write_byte(ctx, out, "0123456789abcdef"[(c >> 4) & 0xf]);
++				fz_write_byte(ctx, out, "0123456789abcdef"[c & 0xf]);
++			}
++			fz_write_string(ctx, out, ">]");
++		}
++		else if (cs)
++			fz_throw(ctx, FZ_ERROR_UNSUPPORTED, "BI operator cannot express this unnamed inline colorspace");
+ 		else
+ 			fz_throw(ctx, FZ_ERROR_ARGUMENT, "BI operator can only show ImageMask, Gray, RGB, or CMYK images");
+ 		if (img->interpolate)

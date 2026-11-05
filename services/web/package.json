@@ -1,0 +1,16 @@
+{
+  "name": "pdfedit-web",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Browser UI for the C++/WebAssembly PDF editor",
+  "scripts": {
+    "serve": "python3 -m http.server 8765",
+    "test:unit": "node --test tests/unit/",
+    "test:e2e": "playwright test",
+    "test": "node --test tests/unit/ && playwright test"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.64.1"
+  }
+}

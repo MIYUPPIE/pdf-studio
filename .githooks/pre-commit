@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+# Gate tests on every commit: engine (native, deterministic) + web unit tests.
+set -euo pipefail
+cd "$(git rev-parse --show-toplevel)"
+if [ ! -e third_party/mupdf/build/release/libmupdf.a ]; then
+  echo "pre-commit: MuPDF not built (run 'make deps mupdf'); cannot run gate tests" >&2
+  exit 1
+fi
+make -s test
